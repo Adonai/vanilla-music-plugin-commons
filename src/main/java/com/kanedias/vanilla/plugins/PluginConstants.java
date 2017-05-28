@@ -41,6 +41,9 @@ public class PluginConstants {
 
     // this is passed to plugin when it is selected by user
     public static final String EXTRA_PARAM_URI = "ch.blinkenlights.android.vanilla.extra.URI";
+    public static final String EXTRA_PARAM_SONG_TITLE = "ch.blinkenlights.android.vanilla.extra.SONG_TITLE";
+    public static final String EXTRA_PARAM_SONG_ALBUM = "ch.blinkenlights.android.vanilla.extra.SONG_ALBUM";
+    public static final String EXTRA_PARAM_SONG_ARTIST = "ch.blinkenlights.android.vanilla.extra.SONG_ARTIST";
 
     // plugin-to-plugin extras (pass EXTRA_PARAM_PLUGIN_APP too to know whom to answer)
     public static final String EXTRA_PARAM_P2P = "ch.blinkenlights.android.vanilla.extra.P2P"; // marker
