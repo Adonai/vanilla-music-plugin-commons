@@ -1,0 +1,8 @@
+<resources>
+    <string name="file_on_external_sd_warning">Úgy tűnik, hogy a fájl külső SD kártyán van, az Android nem biztosít megfelelő API-t azokhoz</string>
+    <string name="file_on_external_sd_workaround">Kerülőmegoldásként válassza ki ezt a fájl az SAF fájlválasztóval, hogy ideiglenes hozzáférést adjon</string>
+    <string name="file_on_external_sd_hint">Kiválasztandó fájlútvonal: %s</string>
+    <string name="saf_nothing_selected">Semmi nem lett kiválasztva a SAF fájlválasztóval, kilépés…</string>
+    <string name="saf_write_error">SAF hiba: </string>
+    <string name="need_sd_card_access">SD kártya hozzáférés szükséges, a lépesek lent</string>
+</resources>
