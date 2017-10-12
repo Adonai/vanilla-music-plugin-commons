@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- dialog style for all plugin activities, for having actionbar at the top -->
+    <!-- this style is not sufficient to make your activity a dialog -->
+    <!-- See DialogActivity#onCreate for more info -->
+    <style name="DialogTheme" parent="android:Theme.DeviceDefault.Dialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowSoftInputMode">stateAlwaysHidden</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
+</resources>
