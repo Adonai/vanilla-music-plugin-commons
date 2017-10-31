@@ -1,10 +1,16 @@
 package com.kanedias.vanilla.plugins.saf;
 
+import android.annotation.TargetApi;
+import android.content.Context;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.provider.DocumentFile;
+import android.util.Log;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -12,17 +18,7 @@ import java.util.List;
  *
  * @author Oleg Chernovskiy
  */
-
 public class SafUtils {
-
-    /**
-     * Check if Android Storage Access Framework routines apply here
-     * @return true if document seems to be SAF-accessible only, false otherwise
-     */
-    public static boolean isSafNeeded(File file) {
-        // on external SD card after KitKat this will return false
-        return !file.canWrite() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
-    }
 
     /**
      * Finds needed file through Document API for SAF. It's not optimized yet - you can still gain wrong URI on
@@ -51,5 +47,81 @@ public class SafUtils {
         }
 
         return null;
+    }
+
+    /**
+     * Check if Android Storage Access Framework routines apply here
+     * @return true if document seems to be SAF-accessible only, false otherwise
+     */
+    public static boolean isSafNeeded(File file, Context c) {
+        // on external SD card after KitKat this will return false
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && isOnExtSdCard(file, c);
+    }
+
+    /**
+     * Determine if a file is on external sd card. (Kitkat or higher.)
+     *
+     * @param file The file.
+     * @return true if on external sd card.
+     */
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    public static boolean isOnExtSdCard(File file, Context c) {
+        return getExtSdCardFolder(file, c) != null;
+    }
+
+    /**
+     * Determine the main folder of the external SD card containing the given file.
+     *
+     * @param file the file.
+     * @return The main folder of the external SD card containing this file, if the file is on an SD card. Otherwise,
+     * null is returned.
+     */
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    @Nullable
+    private static String getExtSdCardFolder(final File file, Context context) {
+        String[] extSdPaths = getExtSdCardPaths(context);
+        try {
+            for (String extSdPath : extSdPaths) {
+                if (file.getCanonicalPath().startsWith(extSdPath)) {
+                    return extSdPath;
+                }
+            }
+        } catch (IOException e) {
+            return null;
+        }
+        return null;
+    }
+
+
+    /**
+     * Get a list of external SD card paths. (Kitkat or higher.)
+     *
+     * @return A list of external SD card paths.
+     */
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    @NonNull
+    private static String[] getExtSdCardPaths(Context context) {
+        List<String> paths = new ArrayList<>();
+        for (File file : context.getExternalFilesDirs("external")) {
+            if (file != null && !file.equals(context.getExternalFilesDir("external"))) {
+                int index = file.getAbsolutePath().lastIndexOf("/Android/data");
+                if (index < 0) {
+                    Log.w("Vanilla Plugins", "Unexpected external file dir: " + file.getAbsolutePath());
+                } else {
+                    String path = file.getAbsolutePath().substring(0, index);
+                    try {
+                        path = new File(path).getCanonicalPath();
+                    } catch (IOException e) {
+                        // Keep non-canonical path.
+                    }
+                    paths.add(path);
+                }
+            }
+        }
+        if (paths.isEmpty()) {
+            paths.add("/storage/sdcard1");
+        }
+
+        return paths.toArray(new String[0]);
     }
 }
