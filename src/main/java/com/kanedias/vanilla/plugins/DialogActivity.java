@@ -26,9 +26,9 @@ public abstract class DialogActivity extends Activity {
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
-        window.setFlags(FLAG_DIM_BEHIND, FLAG_DIM_BEHIND);
+        // clear all flags but dim behind
+        window.setFlags(FLAG_DIM_BEHIND, Integer.MAX_VALUE);
         WindowManager.LayoutParams params = window.getAttributes();
-        params.height = (int) (metrics.heightPixels * 0.8f);
         params.width = (int) (metrics.widthPixels * 0.9f);
         params.alpha = 1.0f;
         params.dimAmount = 0.5f;
