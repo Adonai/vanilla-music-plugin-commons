@@ -45,7 +45,6 @@ public class SafUtils {
                 return file;
             }
         }
-
         return null;
     }
 
@@ -92,7 +91,6 @@ public class SafUtils {
         return null;
     }
 
-
     /**
      * Get a list of external SD card paths. (Kitkat or higher.)
      *
@@ -121,7 +119,6 @@ public class SafUtils {
         if (paths.isEmpty()) {
             paths.add("/storage/sdcard1");
         }
-
         return paths.toArray(new String[0]);
     }
 }

@@ -21,8 +21,7 @@ package com.kanedias.vanilla.plugins;
  */
 public class PluginConstants {
 
-    private PluginConstants() {
-    }
+    private PluginConstants() {}
 
     // auxiliary constants for SAF interchange
     public static final String EXTRA_PARAM_SAF_P2P = "ch.blinkenlights.android.vanilla.extra.SAF_P2P";

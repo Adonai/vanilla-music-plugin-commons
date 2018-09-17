@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -16,14 +15,15 @@ import android.preference.PreferenceManager;
 import android.widget.Toast;
 
 import com.kanedias.vanilla.plugins.R;
-import com.kanedias.vanilla.plugins.PluginConstants;
 
 import java.io.File;
 
-import static com.kanedias.vanilla.plugins.PluginConstants.*;
 import static com.kanedias.vanilla.plugins.PluginConstants.ACTION_LAUNCH_PLUGIN;
+import static com.kanedias.vanilla.plugins.PluginConstants.ACTION_WAKE_PLUGIN;
 import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_PLUGIN_APP;
+import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_SAF_P2P;
 import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_URI;
+import static com.kanedias.vanilla.plugins.PluginConstants.PREF_SDCARD_URI;
 
 /**
  * Activity that is needed solely for requesting SAF permissions for external SD cards.
@@ -96,24 +96,16 @@ public class SafRequestActivity extends Activity {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.need_sd_card_access)
                 .setView(R.layout.sd_operate_instructions)
-                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        finish();
-                    }
-                })
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent selectFile = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-                        startActivityForResult(selectFile, SAF_TREE_REQUEST_CODE);
-                    }
-                })
+                .setNegativeButton(android.R.string.cancel, (dialog, which) -> finish())
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+					Intent selectFile = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+					startActivityForResult(selectFile, SAF_TREE_REQUEST_CODE);
+				})
                 .create()
                 .show();
     }
 
-    /**
+    /*
      * Mostly this is needed for SAF support. If the file is located on external SD card then android provides
      * only Storage Access Framework to be able to write anything.
      * @param requestCode our sent code, see {@link SafUtils#isSafNeeded(File)}
@@ -168,5 +160,4 @@ public class SafRequestActivity extends Activity {
         selectFile.setType("audio/*");
         startActivityForResult(selectFile, SAF_FILE_REQUEST_CODE);
     }
-
 }
