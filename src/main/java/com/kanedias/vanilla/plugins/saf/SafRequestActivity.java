@@ -123,12 +123,12 @@ public class SafRequestActivity extends Activity {
         if (requestCode == SAF_FILE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             // access granted, write through
             serviceStart.putExtra(EXTRA_PARAM_SAF_P2P, data);
-            startService(serviceStart); // pass intent back to the service
+            startActivity(serviceStart); // pass intent back to the activity
         }
 
         if (requestCode == SAF_TREE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             saveTreeAccessForever(data);
-            startService(serviceStart); // pass intent back to the service
+            startActivity(serviceStart); // pass intent back to the activity
         }
 
         // canceled or denied
