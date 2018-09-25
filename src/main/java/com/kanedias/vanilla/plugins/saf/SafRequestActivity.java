@@ -3,14 +3,11 @@ package com.kanedias.vanilla.plugins.saf;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.net.Uri;
 import android.os.Build;
-import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 
@@ -19,7 +16,6 @@ import com.kanedias.vanilla.plugins.R;
 import java.io.File;
 
 import static com.kanedias.vanilla.plugins.PluginConstants.ACTION_LAUNCH_PLUGIN;
-import static com.kanedias.vanilla.plugins.PluginConstants.ACTION_WAKE_PLUGIN;
 import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_PLUGIN_APP;
 import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_SAF_P2P;
 import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_URI;
@@ -42,28 +38,11 @@ public class SafRequestActivity extends Activity {
 
     private SharedPreferences mPrefs;
 
-    private ServiceConnection mServiceConn = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-        }
-    };
-
-
     @Override
     protected void onResume() {
         super.onResume();
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-
-        // need to bind the service or it will stop itself after TagEditActivity is closed
-        ApplicationInfo info = getIntent().getParcelableExtra(EXTRA_PARAM_PLUGIN_APP);
-        Intent bind = new Intent(ACTION_WAKE_PLUGIN);
-        bind.setPackage(info.packageName);
-        bindService(bind, mServiceConn, 0);
 
         Uri fileUri = getIntent().getParcelableExtra(EXTRA_PARAM_URI);
         mFile = new File(fileUri.getPath());
@@ -81,12 +60,6 @@ public class SafRequestActivity extends Activity {
         callSafFilePicker();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unbindService(mServiceConn);
-    }
-
     /**
      * Call tree-picker to select root of SD card.
      * Shows a hint how to do this, continues if "ok" is clicked.
@@ -98,9 +71,9 @@ public class SafRequestActivity extends Activity {
                 .setView(R.layout.sd_operate_instructions)
                 .setNegativeButton(android.R.string.cancel, (dialog, which) -> finish())
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-					Intent selectFile = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-					startActivityForResult(selectFile, SAF_TREE_REQUEST_CODE);
-				})
+                    Intent selectFile = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+                    startActivityForResult(selectFile, SAF_TREE_REQUEST_CODE);
+                })
                 .create()
                 .show();
     }

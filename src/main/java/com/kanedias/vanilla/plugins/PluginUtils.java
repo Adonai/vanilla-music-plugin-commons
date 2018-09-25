@@ -24,7 +24,7 @@ public class PluginUtils {
      * @return true if this app had this permission prior to check, false otherwise.
      */
     public static boolean checkAndRequestPermissions(Activity ctx, String perm) {
-        if (havePermissions(ctx, perm) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (!havePermissions(ctx, perm) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             ctx.requestPermissions(new String[]{perm}, PERMISSIONS_REQUEST_CODE);
             return false;
         }
