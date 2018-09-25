@@ -35,11 +35,11 @@ public class PluginUtils {
      * Checks if all required permissions have been granted
      *
      * @param context The context to use
-     * @return boolean true if all permissions have been granded
+     * @return boolean true if all permissions have been granted
      */
     public static boolean havePermissions(Context context, String perm) {
         // else: granted during installation
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                context.checkSelfPermission(perm) != PackageManager.PERMISSION_GRANTED;
+                context.checkSelfPermission(perm) == PackageManager.PERMISSION_GRANTED;
     }
 }
