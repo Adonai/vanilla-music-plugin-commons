@@ -56,7 +56,7 @@ public class SafRequestActivity extends Activity {
 
         // it's Kitkat - we're doomed to request each file one by one
         // this is very unlikely actually - external card is still R/W for KitKat, so
-        // service should be able to persist everything through normal File API
+        // plugin should be able to persist everything through normal File API
         callSafFilePicker();
     }
 
@@ -87,21 +87,21 @@ public class SafRequestActivity extends Activity {
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Intent serviceStart = new Intent(ACTION_LAUNCH_PLUGIN);
+        Intent activityStart = new Intent(ACTION_LAUNCH_PLUGIN);
         ApplicationInfo info = getIntent().getParcelableExtra(EXTRA_PARAM_PLUGIN_APP);
-        serviceStart.setPackage(info.packageName);
-        serviceStart.putExtras(getIntent());
-        serviceStart.putExtra(EXTRA_PARAM_SAF_P2P, data);
+        activityStart.setPackage(info.packageName);
+        activityStart.putExtras(getIntent());
+        activityStart.putExtra(EXTRA_PARAM_SAF_P2P, data);
 
         if (requestCode == SAF_FILE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             // access granted, write through
-            serviceStart.putExtra(EXTRA_PARAM_SAF_P2P, data);
-            startActivity(serviceStart); // pass intent back to the activity
+            activityStart.putExtra(EXTRA_PARAM_SAF_P2P, data);
+            startActivity(activityStart); // pass intent back to the activity
         }
 
         if (requestCode == SAF_TREE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             saveTreeAccessForever(data);
-            startActivity(serviceStart); // pass intent back to the activity
+            startActivity(activityStart); // pass intent back to the activity
         }
 
         // canceled or denied
