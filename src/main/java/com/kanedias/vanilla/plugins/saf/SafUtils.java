@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.kanedias.vanilla.plugins.PluginConstants.LOG_TAG;
+
 /**
  * Utility class for SAF-related routines
  *
@@ -50,22 +52,25 @@ public class SafUtils {
 
     /**
      * Check if Android Storage Access Framework routines apply here
+     * @param file file to check permissions for
+     * @param ctx context to use when resolving sdcard paths
      * @return true if document seems to be SAF-accessible only, false otherwise
      */
-    public static boolean isSafNeeded(File file, Context c) {
+    public static boolean isSafNeeded(File file, Context ctx) {
         // on external SD card after KitKat this will return false
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && isOnExtSdCard(file, c);
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && isOnExtSdCard(file, ctx);
     }
 
     /**
      * Determine if a file is on external sd card. (Kitkat or higher.)
      *
-     * @param file The file.
-     * @return true if on external sd card.
+     * @param file The file
+     * @param ctx context to use when resolving sdcard paths
+     * @return true if on external sd card
      */
     @TargetApi(Build.VERSION_CODES.KITKAT)
-    public static boolean isOnExtSdCard(File file, Context c) {
-        return getExtSdCardFolder(file, c) != null;
+    public static boolean isOnExtSdCard(File file, Context ctx) {
+        return getExtSdCardFolder(file, ctx) != null;
     }
 
     /**
@@ -92,7 +97,7 @@ public class SafUtils {
     }
 
     /**
-     * Get a list of external SD card paths. (Kitkat or higher.)
+     * Get a list of external SD card paths. (Kitkat or higher)
      *
      * @return A list of external SD card paths.
      */
@@ -104,7 +109,7 @@ public class SafUtils {
             if (file != null && !file.equals(context.getExternalFilesDir("external"))) {
                 int index = file.getAbsolutePath().lastIndexOf("/Android/data");
                 if (index < 0) {
-                    Log.w("Vanilla Plugins", "Unexpected external file dir: " + file.getAbsolutePath());
+                    Log.w(LOG_TAG, "Unexpected external file dir: " + file.getAbsolutePath());
                 } else {
                     String path = file.getAbsolutePath().substring(0, index);
                     try {

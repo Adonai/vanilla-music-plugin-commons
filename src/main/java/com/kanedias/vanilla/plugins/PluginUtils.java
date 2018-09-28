@@ -5,6 +5,10 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * Common routines for all plugins
  *
@@ -44,5 +48,23 @@ public class PluginUtils {
             }
         } // else: granted during installation
         return true;
+    }
+
+    /**
+     * Reads an InputStream fully to byte array
+     * @param stream stream to read from
+     * @return resulting byte array, never null
+     * @throws IOException if any error happens during read
+     */
+    public static byte[] readFully(InputStream stream) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buffer = new byte[4096];
+        int count;
+        while ((count = stream.read(buffer)) != -1) {
+            baos.write(buffer, 0, count);
+        }
+
+        stream.close();
+        return baos.toByteArray();
     }
 }

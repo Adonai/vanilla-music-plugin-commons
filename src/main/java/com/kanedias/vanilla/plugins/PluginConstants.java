@@ -24,7 +24,6 @@ public class PluginConstants {
     private PluginConstants() {}
 
     // auxiliary constants for SAF interchange
-    public static final String EXTRA_PARAM_SAF_P2P = "ch.blinkenlights.android.vanilla.extra.SAF_P2P";
     public static final String PREF_SDCARD_URI = "ch.blinkenlights.android.vanilla.pref.SDCARD_URI";
 
     // these actions are for passing between main player and plugins

@@ -5,28 +5,28 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.kanedias.vanilla.plugins.R;
 
 import java.io.File;
 
-import static com.kanedias.vanilla.plugins.PluginConstants.ACTION_LAUNCH_PLUGIN;
-import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_PLUGIN_APP;
-import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_SAF_P2P;
-import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_URI;
+import static com.kanedias.vanilla.plugins.PluginConstants.LOG_TAG;
 import static com.kanedias.vanilla.plugins.PluginConstants.PREF_SDCARD_URI;
 
 /**
- * Activity that is needed solely for requesting SAF permissions for external SD cards.
+ * Handler that is needed solely for the purpose of requesting SAF permissions for external SD cards.
+ * Mostly this is needed for external media support.
+ * If the file is located on external SD card then android provides
+ * only Storage Access Framework to be able to write anything.
  *
  * @author  Kanedias on 17.02.17.
  */
-public class SafRequestActivity extends Activity {
+public class SafPermissionHandler {
 
     private static final int SAF_FILE_REQUEST_CODE = 1;
     private static final int SAF_TREE_REQUEST_CODE = 2;
@@ -34,19 +34,15 @@ public class SafRequestActivity extends Activity {
     /**
      * File to search access for
      */
-    private File mFile;
-
+    private Activity ctx;
     private SharedPreferences mPrefs;
 
-    @Override
-    protected void onResume() {
-        super.onResume();
+    public SafPermissionHandler(Activity ctx) {
+        this.ctx = ctx;
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+    }
 
-        mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-
-        Uri fileUri = getIntent().getParcelableExtra(EXTRA_PARAM_URI);
-        mFile = new File(fileUri.getPath());
-
+    public void handleFile(File file) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             // it's Lollipop - let's request tree URI instead of nitpicking with specific files...
             // deal with file passed after request is fulfilled
@@ -57,7 +53,7 @@ public class SafRequestActivity extends Activity {
         // it's Kitkat - we're doomed to request each file one by one
         // this is very unlikely actually - external card is still R/W for KitKat, so
         // plugin should be able to persist everything through normal File API
-        callSafFilePicker();
+        callSafFilePicker(file);
     }
 
     /**
@@ -66,71 +62,68 @@ public class SafRequestActivity extends Activity {
      */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void callSafRequestTree() {
-        new AlertDialog.Builder(this)
+        new AlertDialog.Builder(ctx)
                 .setTitle(R.string.need_sd_card_access)
                 .setView(R.layout.sd_operate_instructions)
-                .setNegativeButton(android.R.string.cancel, (dialog, which) -> finish())
+                .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                     Intent selectFile = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-                    startActivityForResult(selectFile, SAF_TREE_REQUEST_CODE);
+                    ctx.startActivityForResult(selectFile, SAF_TREE_REQUEST_CODE);
                 })
                 .create()
                 .show();
     }
 
     /*
-     * Mostly this is needed for SAF support. If the file is located on external SD card then android provides
-     * only Storage Access Framework to be able to write anything.
+     * Call this method from your activity to get results once SAF file picker finishes.
      * @param requestCode our sent code, see {@link SafUtils#isSafNeeded(File)}
      * @param resultCode success or error
      * @param data URI-containing intent
      */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Intent activityStart = new Intent(ACTION_LAUNCH_PLUGIN);
-        ApplicationInfo info = getIntent().getParcelableExtra(EXTRA_PARAM_PLUGIN_APP);
-        activityStart.setPackage(info.packageName);
-        activityStart.putExtras(getIntent());
-        activityStart.putExtra(EXTRA_PARAM_SAF_P2P, data);
-
+    public boolean onActivityResult(int requestCode, int resultCode, Intent clearance) {
         if (requestCode == SAF_FILE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             // access granted, write through
-            activityStart.putExtra(EXTRA_PARAM_SAF_P2P, data);
-            startActivity(activityStart); // pass intent back to the activity
+            return true;
         }
 
         if (requestCode == SAF_TREE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            saveTreeAccessForever(data);
-            startActivity(activityStart); // pass intent back to the activity
+            saveTreeAccessForever(clearance);
+            return true;
         }
 
         // canceled or denied
-        finish();
+        Log.e(LOG_TAG, "Saf access request was denied" + clearance);
+        return false;
     }
 
     /**
      * Saves SAF-provided tree URI forever
-     * @param data intent containing tree URI in data
+     * @param clearance intent containing tree URI in data
      */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void saveTreeAccessForever(Intent data) {
-        Uri treeAccessUri = data.getData();
-        getContentResolver().takePersistableUriPermission(treeAccessUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+    private void saveTreeAccessForever(Intent clearance) {
+        if (clearance.getData() == null) {
+            Log.e(LOG_TAG, "Access to sdcard was granted but no access uri given: " + clearance);
+        }
+
+        Uri treeAccessUri = clearance.getData();
+        ctx.getContentResolver().takePersistableUriPermission(treeAccessUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
         mPrefs.edit().putString(PREF_SDCARD_URI, treeAccessUri.toString()).apply();
     }
 
     /**
      * Opens SAF file pick dialog to allow you to select specific file to write to
+     * @param file file to request picker for
      */
     @TargetApi(Build.VERSION_CODES.KITKAT)
-    private void callSafFilePicker() {
-        Toast.makeText(this, R.string.file_on_external_sd_warning, Toast.LENGTH_LONG).show();
-        Toast.makeText(this, R.string.file_on_external_sd_workaround, Toast.LENGTH_LONG).show();
-        Toast.makeText(this, String.format(getString(R.string.file_on_external_sd_hint), mFile.getPath()), Toast.LENGTH_LONG).show();
+    private void callSafFilePicker(File file) {
+        Toast.makeText(ctx, R.string.file_on_external_sd_warning, Toast.LENGTH_LONG).show();
+        Toast.makeText(ctx, R.string.file_on_external_sd_workaround, Toast.LENGTH_LONG).show();
+        Toast.makeText(ctx, String.format(ctx.getString(R.string.file_on_external_sd_hint), file.getPath()), Toast.LENGTH_LONG).show();
 
         Intent selectFile = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         selectFile.addCategory(Intent.CATEGORY_OPENABLE);
         selectFile.setType("audio/*");
-        startActivityForResult(selectFile, SAF_FILE_REQUEST_CODE);
+        ctx.startActivityForResult(selectFile, SAF_FILE_REQUEST_CODE);
     }
 }
