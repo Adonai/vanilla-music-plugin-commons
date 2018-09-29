@@ -42,6 +42,10 @@ public class SafPermissionHandler {
         mPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
     }
 
+    /**
+     * Start a dialog explaining what's required from user to write data to desired file through SAF.
+     * @param file file to request permissions for
+     */
     public void handleFile(File file) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             // it's Lollipop - let's request tree URI instead of nitpicking with specific files...
