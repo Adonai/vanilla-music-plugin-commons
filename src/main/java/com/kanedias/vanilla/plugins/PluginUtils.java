@@ -43,9 +43,7 @@ public class PluginUtils {
      */
     public static boolean havePermissions(Context context, String perm) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (context.checkSelfPermission(perm) != PackageManager.PERMISSION_GRANTED) {
-                return false;
-            }
+            return context.checkSelfPermission(perm) == PackageManager.PERMISSION_GRANTED;
         } // else: granted during installation
         return true;
     }
