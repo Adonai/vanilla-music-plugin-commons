@@ -2,12 +2,18 @@ package com.kanedias.vanilla.plugins;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Build;
+import android.text.TextUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
+
+import static com.kanedias.vanilla.plugins.PluginConstants.ACTION_REQUEST_PLUGIN_PARAMS;
 
 /**
  * Common routines for all plugins
@@ -44,7 +50,9 @@ public class PluginUtils {
     public static boolean havePermissions(Context context, String perm) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             return context.checkSelfPermission(perm) == PackageManager.PERMISSION_GRANTED;
-        } // else: granted during installation
+        }
+
+        // else: granted during installation
         return true;
     }
 
@@ -64,5 +72,21 @@ public class PluginUtils {
 
         stream.close();
         return baos.toByteArray();
+    }
+
+    /**
+     * Queries Android package manager for specific broadcast receivers that only Vanilla plugins use.
+     * @param ctx context from which to call package manager
+     * @param pkgName package name of the plugin to search for
+     * @return true if plugin with such package name is installed, false otherwise
+     */
+    public static boolean pluginInstalled(Context ctx, String pkgName) {
+        List<ResolveInfo> resolved = ctx.getPackageManager().queryBroadcastReceivers(new Intent(ACTION_REQUEST_PLUGIN_PARAMS), 0);
+        for (ResolveInfo pkg : resolved) {
+            if (TextUtils.equals(pkg.activityInfo.packageName, pkgName)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
