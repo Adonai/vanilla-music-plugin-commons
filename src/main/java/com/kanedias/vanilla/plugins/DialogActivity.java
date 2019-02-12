@@ -2,10 +2,10 @@ package com.kanedias.vanilla.plugins;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 import android.view.Window;
 import android.view.WindowManager;
+import androidx.annotation.Nullable;
 
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
