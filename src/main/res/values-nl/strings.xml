@@ -1,0 +1,8 @@
+<resources>
+    <string name="file_on_external_sd_warning">Bestand blijkt op een externe SD-kaart te staan. Android biedt hier geen degelijke API-ondersteuning voor.</string>
+    <string name="file_on_external_sd_workaround">Als een workaround, selecteer a.u.b. dit bestand in de SAF-bestandsselectie om tijdelijk toegang te verlenen.</string>
+    <string name="file_on_external_sd_hint">Bestandspad om te selecteren: %s</string>
+    <string name="saf_nothing_selected">Niets is geselecteerd van SAF-bestandsselectie, afsluiten…</string>
+    <string name="saf_write_error">SAF-uitwisselfout: </string>
+    <string name="need_sd_card_access">Toegang tot SD-kaart is vereist, volg stappen hieronder</string>
+</resources>
